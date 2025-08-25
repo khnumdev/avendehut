@@ -12,7 +12,7 @@ from .build import build_command
 console = Console()
 
 
-@click.command()
+@click.command(context_settings={"help_option_names": ["-h", "-help", "--help"]})
 @click.option("--src", type=click.Path(exists=True, file_okay=False, path_type=Path), required=True)
 @click.option("--out", type=click.Path(file_okay=False, path_type=Path), required=True)
 @click.option("--interval", type=float, default=2.0, show_default=True, help="Polling interval in seconds")

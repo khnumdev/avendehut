@@ -30,7 +30,7 @@ def iter_catalog(out: Path) -> Iterable[dict]:
     raise click.ClickException("No catalog found. Run 'avendehut build' first.")
 
 
-@click.command()
+@click.command(context_settings={"help_option_names": ["-h", "-help", "--help"]})
 @click.option("--out", type=click.Path(file_okay=False, path_type=Path), required=True)
 @click.option("--query", type=str, default="", help="Search text")
 @click.option("--tags", type=str, default="", help="Comma-separated tags to filter")

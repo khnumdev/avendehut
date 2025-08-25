@@ -20,7 +20,7 @@ from .commands.export import export_command
 console = Console()
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.group(context_settings={"help_option_names": ["-h", "-help", "--help"]})
 @click.version_option(package_name="avendehut")
 def main() -> None:
   """avendehut - build and search a local HTML catalog of books.

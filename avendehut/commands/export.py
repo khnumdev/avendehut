@@ -10,7 +10,7 @@ import click
 from .search import iter_catalog
 
 
-@click.command()
+@click.command(context_settings={"help_option_names": ["-h", "-help", "--help"]})
 @click.option("--out", type=click.Path(dir_okay=False, path_type=Path), required=True)
 @click.option("--format", "format_", type=click.Choice(["csv", "json"], case_sensitive=False), required=True)
 @click.option("--src-out", "out_dir", type=click.Path(file_okay=False, path_type=Path), required=True, help="Directory containing built catalog (for reading data)")

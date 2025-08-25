@@ -39,7 +39,7 @@ def compute_file_hash(path: Path) -> str:
   return sha.hexdigest()
 
 
-@click.command()
+@click.command(context_settings={"help_option_names": ["-h", "-help", "--help"]})
 @click.option("--src", type=click.Path(exists=True, file_okay=False, path_type=Path), required=True, help="Source folder (local or onedrive:/path)")
 @click.option("--out", type=click.Path(file_okay=False, path_type=Path), required=True, help="Output folder")
 @click.option("--format", "format_", type=click.Choice(["html"], case_sensitive=False), default="html", show_default=True)

@@ -26,6 +26,8 @@ ebooklib = "^0.18"
 pypdf = "^5.0.1"
 python-slugify = "^8.0.4"
 chardet = "^5.2.0"
+azure-identity = "^1.17.1"
+msgraph-sdk = "^1.8.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"

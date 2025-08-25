@@ -10,7 +10,7 @@ from rich.console import Console
 console = Console()
 
 
-@click.command()
+@click.command(context_settings={"help_option_names": ["-h", "-help", "--help"]})
 @click.option("--out", type=click.Path(file_okay=False, path_type=Path), required=True)
 def clean_command(out: Path) -> None:
   """Delete generated output and manifest."""

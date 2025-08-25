@@ -31,7 +31,7 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 
 1. Clone the repository.
    ```bash
-   git clone https://github.com/yourusername/avendehut.git
+   git clone https://github.com/khnumdev/avendehut.git
    cd avendehut
    ```
 2. Install dependencies with Poetry.
