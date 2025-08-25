@@ -18,7 +18,10 @@ def export_command(out: Path, format_: str, out_dir: Path) -> None:
   """Export catalog to CSV or JSON."""
   items = list(iter_catalog(out_dir))
   if format_ == "json":
-    out.write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
+    # Write atomically to avoid partial files
+    tmp = out.with_suffix(out.suffix + ".tmp")
+    tmp.write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(out)
   else:
     fieldnames = [
       "id",
@@ -34,7 +37,9 @@ def export_command(out: Path, format_: str, out_dir: Path) -> None:
       "created_at",
       "modified_at",
     ]
-    with out.open("w", newline="", encoding="utf-8") as f:
+    # Write atomically to avoid partial files
+    tmp = out.with_suffix(out.suffix + ".tmp")
+    with tmp.open("w", newline="", encoding="utf-8") as f:
       writer = csv.DictWriter(f, fieldnames=fieldnames)
       writer.writeheader()
       for it in items:
@@ -42,4 +47,5 @@ def export_command(out: Path, format_: str, out_dir: Path) -> None:
         row["authors"] = ", ".join(row.get("authors", []) or [])
         row["tags"] = ", ".join(row.get("tags", []) or [])
         writer.writerow(row)
+    tmp.replace(out)
 

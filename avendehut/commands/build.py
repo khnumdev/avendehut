@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import os
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import Iterable, List
 
 import click
 from rich.console import Console
@@ -40,7 +38,7 @@ def compute_file_hash(path: Path) -> str:
 
 
 @click.command(context_settings={"help_option_names": ["-h", "-help", "--help"]})
-@click.option("--src", type=click.Path(exists=True, file_okay=False, path_type=Path), required=True, help="Source folder (local or onedrive:/path)")
+@click.option("--src", type=click.Path(exists=True, file_okay=False, path_type=Path), required=True, help="Source folder (local path)")
 @click.option("--out", type=click.Path(file_okay=False, path_type=Path), required=True, help="Output folder")
 @click.option("--format", "format_", type=click.Choice(["html"], case_sensitive=False), default="html", show_default=True)
 @click.option("--force", is_flag=True, help="Reprocess all files, ignoring manifest")

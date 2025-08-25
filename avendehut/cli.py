@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 import sys
-import webbrowser
-from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
-from rich.table import Table
 
 from .commands.build import build_command
 from .commands.watch import watch_command
