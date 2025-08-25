@@ -26,8 +26,6 @@ def watch_command(src: Path, out: Path, interval: float) -> None:
       if snapshot != last_snapshot:
         # Trigger a build
         console.print("Change detected. Rebuilding...")
-        # Invoke build_command programmatically
-        build_command.callback  # type: ignore[attr-defined]
         build_command.main(  # type: ignore
           args=["--src", str(src), "--out", str(out)], prog_name="avendehut build", standalone_mode=False
         )

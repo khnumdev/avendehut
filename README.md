@@ -50,6 +50,7 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 - Required environment variables:
   - `ONEDRIVE_CLIENT_ID`
   - `ONEDRIVE_CLIENT_SECRET`
+  - `ONEDRIVE_TENANT_ID`
   - `SRC_FOLDER` (OneDrive folder path)
   - `OUT_FOLDER` (local output path)
 - Register an app and configure permissions by following Microsoft's official docs: [Register an application](https://learn.microsoft.com/en-us/graph/auth-register-app-v2).
