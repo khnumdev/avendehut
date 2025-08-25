@@ -65,6 +65,22 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 | `avendehut search` | CLI search in local index. | `--query "<text>"`, `--tags "<tag1,tag2>"` |
 | `avendehut export` | Exports catalog to CSV or JSON. | `--out <file>`, `--format csv|json` |
 
+### Usage
+
+```bash
+# Build a catalog from a local folder
+poetry run avendehut build --src ./books --out ./dist
+
+# Open the generated HTML
+poetry run avendehut open --out ./dist
+
+# Search from the CLI
+poetry run avendehut search --out ./dist --query "Dune" --tags "sci-fi,epub"
+
+# Export catalog
+poetry run avendehut export --src-out ./dist --format csv --out ./dist/catalog.csv
+```
+
 ### HTML Catalog Features
 
 - Responsive design (mobile, tablet, desktop).

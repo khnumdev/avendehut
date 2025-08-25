@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import Generator, Iterable, List
 
 from msgraph import GraphServiceClient  # type: ignore
-from azure.identity import DeviceCodeCredential  # type: ignore
-import requests
+from azure.identity import ClientSecretCredential  # type: ignore
 
 
 def is_onedrive_path(path: str) -> bool:
@@ -14,61 +13,46 @@ def is_onedrive_path(path: str) -> bool:
 
 
 def ensure_onedrive_env() -> None:
-  required = ["ONEDRIVE_CLIENT_ID"]
+  required = ["ONEDRIVE_CLIENT_ID", "ONEDRIVE_CLIENT_SECRET", "ONEDRIVE_TENANT_ID"]
   missing = [k for k in required if not os.getenv(k)]
   if missing:
     raise RuntimeError(f"Missing OneDrive environment variables: {', '.join(missing)}")
 
 
 def _get_graph_client() -> GraphServiceClient:
+  tenant_id = os.environ["ONEDRIVE_TENANT_ID"]
   client_id = os.environ["ONEDRIVE_CLIENT_ID"]
-  tenant_id = os.environ.get("ONEDRIVE_TENANT_ID", "consumers")
-  # Device code credential prompts user in terminal to authenticate once and caches token
-  credential = DeviceCodeCredential(client_id=client_id, tenant_id=tenant_id)
-  scopes = ["Files.Read.All"]
-  client = GraphServiceClient(credential=credential, scopes=scopes)
-  return client
+  client_secret = os.environ["ONEDRIVE_CLIENT_SECRET"]
+  credential = ClientSecretCredential(tenant_id=tenant_id, client_id=client_id, client_secret=client_secret)
+  # Use app-only default scope for Microsoft Graph
+  scopes = ["https://graph.microsoft.com/.default"]
+  return GraphServiceClient(credential=credential, scopes=scopes)
 
 
-def _enumerate_children_with_paging(client: GraphServiceClient, rel_path: str) -> List[dict]:
-  # First page via SDK
+def _list_children_once(client: GraphServiceClient, rel_path: str):
   if rel_path.strip("/"):
-    collection = client.me.drive.root.item_with_path(rel_path).children.get()
-  else:
-    collection = client.me.drive.root.children.get()
+    return client.me.drive.root.item_with_path(rel_path).children.get()
+  return client.me.drive.root.children.get()
 
-  items: List[dict] = []
-  if collection and getattr(collection, "value", None):
-    for it in collection.value:
-      items.append(it.__dict__)
 
-  # Follow @odata.nextLink using raw requests with the same credential
-  next_link = getattr(collection, "odata_next_link", None)
-  if next_link:
-    # Acquire bearer token for request
-    credential = client._client._config.authentication_provider._scopes_credential  # type: ignore[attr-defined]
-    # Fallback: create our own credential if not accessible
-    token = None
-    try:
-      token = credential.get_token("Files.Read.All")
-    except Exception:
-      cred = DeviceCodeCredential(client_id=os.environ["ONEDRIVE_CLIENT_ID"], tenant_id=os.environ.get("ONEDRIVE_TENANT_ID", "consumers"))
-      token = cred.get_token("Files.Read.All")
-    headers = {"Authorization": f"Bearer {token.token}", "Accept": "application/json"}
-    url = next_link
-    while url:
-      resp = requests.get(url, headers=headers, timeout=30)
-      resp.raise_for_status()
-      data = resp.json()
-      for it in data.get("value", []):
-        items.append(it)
-      url = data.get("@odata.nextLink")
-
-  return items
+def _iterate_children(client: GraphServiceClient, rel_path: str):
+  collection = _list_children_once(client, rel_path)
+  while True:
+    if collection and getattr(collection, "value", None):
+      for it in collection.value:
+        yield it
+    next_link = getattr(collection, "odata_next_link", None)
+    if not next_link:
+      break
+    # Follow next link via SDK request adapter
+    collection = client._client._request_adapter.send_async(  # type: ignore[attr-defined]
+      request_info=client._client._request_adapter.base_url_provider.clone_request_information(next_link),  # type: ignore[attr-defined]
+      response_type=type(collection),
+    ).result()
 
 
 def list_onedrive_files(prefix_path: str) -> Iterable[Path]:  # pragma: no cover - network
-  """List files under the given OneDrive path using Microsoft Graph SDK with pagination.
+  """List files under the given OneDrive path using Microsoft Graph (app-only).
 
   Returns Path objects with the pseudo scheme 'onedrive:/...'. Only files are returned; folders
   are traversed recursively.
@@ -79,21 +63,15 @@ def list_onedrive_files(prefix_path: str) -> Iterable[Path]:  # pragma: no cover
   ensure_onedrive_env()
   client = _get_graph_client()
 
-  # Normalize to relative path within drive root
   rel = prefix_path[len("onedrive:/"):].lstrip("/")
-
   stack = [rel]
   while stack:
     current_rel = stack.pop()
-    for it in _enumerate_children_with_paging(client, current_rel):
-      # If it is a folder, descend
-      if it.get("folder") is not None:
-        child_rel = f"{current_rel}/{it.get('name')}" if current_rel else it.get("name")
+    for it in _iterate_children(client, current_rel):
+      if getattr(it, "folder", None) is not None:
+        child_rel = f"{current_rel}/{it.name}" if current_rel else it.name
         stack.append(child_rel)
       else:
-        # File item
-        path_str = f"onedrive:/{current_rel}/{it.get('name')}" if current_rel else f"onedrive:/{it.get('name')}"
-        # Clean double slashes
-        path_str = path_str.replace("//", "/")
-        yield Path(path_str)
+        path_str = f"onedrive:/{current_rel}/{it.name}" if current_rel else f"onedrive:/{it.name}"
+        yield Path(path_str.replace("//", "/"))
 

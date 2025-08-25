@@ -2,11 +2,11 @@
 name = "avendehut"
 version = "0.1.0"
 description = "CLI to scan books, extract metadata, and generate a searchable HTML catalog."
-authors = ["Your Name <you@example.com>"]
+authors = ["khnumdev <khnumdev@users.noreply.github.com>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/yourusername/avendehut"
-repository = "https://github.com/yourusername/avendehut"
+homepage = "https://github.com/khnumdev/avendehut"
+repository = "https://github.com/khnumdev/avendehut"
 keywords = ["books", "metadata", "catalog", "cli", "onedrive"]
 packages = [{ include = "avendehut" }]
 
