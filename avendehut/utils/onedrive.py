@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Generator, Iterable, List
+from typing import Iterable
 
 from msgraph import GraphServiceClient  # type: ignore
 from azure.identity import ClientSecretCredential  # type: ignore
