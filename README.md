@@ -41,6 +41,7 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 3. Set environment variables for OneDrive (if needed).
    - `ONEDRIVE_CLIENT_ID`
    - `ONEDRIVE_CLIENT_SECRET`
+   - `ONEDRIVE_TENANT_ID` (use `consumers` for personal accounts)
    - `SRC_FOLDER` (OneDrive folder path)
    - `OUT_FOLDER` (local output path)
 
@@ -50,6 +51,7 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 - Required environment variables:
   - `ONEDRIVE_CLIENT_ID`
   - `ONEDRIVE_CLIENT_SECRET`
+  - `ONEDRIVE_TENANT_ID` (e.g., `consumers`)
   - `SRC_FOLDER` (OneDrive folder path)
   - `OUT_FOLDER` (local output path)
 - Register an app and configure permissions by following Microsoft's official docs: [Register an application](https://learn.microsoft.com/en-us/graph/auth-register-app-v2).
@@ -62,8 +64,8 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 | `avendehut watch` | Watches source folder for changes, auto‑rebuilds HTML. | Same as build plus `--interval <seconds>` |
 | `avendehut clean` | Deletes generated output and manifest. | `--out <path>` |
 | `avendehut open` | Opens generated HTML in default browser. | `--out <path>` |
-| `avendehut search` | CLI search in local index. | `--query "<text>"`, `--tags "<tag1,tag2>"` |
-| `avendehut export` | Exports catalog to CSV or JSON. | `--out <file>`, `--format csv|json` |
+| `avendehut search` | CLI search in local index. | `--query "<text>", `--tags "<tag1,tag2>"` |
+| `avendehut export` | Exports catalog to CSV or JSON. | `--src-out <dir>` (built catalog dir), `--out <file>`, `--format csv|json` |
 
 ### Usage
 
@@ -115,5 +117,3 @@ poetry run avendehut export --src-out ./dist --format csv --out ./dist/catalog.c
 ### License
 
 Apache 2.0 License.
-
-# avendehut
