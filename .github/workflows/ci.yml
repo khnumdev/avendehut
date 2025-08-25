@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install deps
+        run: poetry install
+      - name: Lint
+        run: |
+          poetry run black --check .
+          poetry run flake8
+      - name: Type check
+        run: poetry run mypy avendehut
+      - name: Test
+        run: poetry run pytest --maxfail=1 --disable-warnings -q
+      - name: Build sample
+        run: |
+          mkdir -p examples/books
+          # Generate a tiny PDF
+          python - <<'PY'
+from pypdf import PdfWriter
+from pathlib import Path
+src = Path('examples/books'); src.mkdir(parents=True, exist_ok=True)
+writer = PdfWriter(); writer.add_blank_page(width=72, height=72); writer.add_metadata({"/Title": "CI PDF", "/Author": "CI"})
+with open(src / 'ci.pdf', 'wb') as f:
+  writer.write(f)
+PY
+          poetry run avendehut build --src examples/books --out dist
+
