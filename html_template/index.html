@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>avendehut catalog</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>avendehut</h1>
+      <div class="controls">
+        <input id="search" type="search" placeholder="Search... (/ to focus)" />
+        <select id="tags" multiple size="4" title="Filter by tags"></select>
+        <button id="dark-toggle" title="Toggle dark mode (d)">🌓</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="stats"></div>
+      <ul id="results"></ul>
+    </main>
+
+    <footer>
+      <small>Built with avendehut. Keyboard: / focus, Esc clear, d dark, j/k nav.</small>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+  </html>
+

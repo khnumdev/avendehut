@@ -1,3 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Env
+.env
+.venv/
+venv/
+
+# Poetry
+poetry.lock
+
+# Tests
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# Generated site
+site/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
