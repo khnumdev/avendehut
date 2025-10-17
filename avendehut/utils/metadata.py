@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
-from ebooklib import epub  # type: ignore
 from pypdf import PdfReader  # type: ignore
 
 
@@ -24,6 +23,9 @@ def _iso(ts: float) -> str:
 
 
 def _extract_epub(path: Path) -> tuple[str, List[str], Optional[int], Optional[str]]:
+  # Lazy import to avoid requiring ebooklib/lxml unless actually processing EPUB files
+  from ebooklib import epub  # type: ignore
+
   book = epub.read_epub(str(path))
   title = (book.get_metadata("DC", "title") or [["", {}]])[0][0] or path.stem
   authors = [a[0] for a in (book.get_metadata("DC", "creator") or []) if a and a[0]] or []

@@ -38,21 +38,17 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
    ```bash
    poetry install
    ```
-3. Set environment variables for OneDrive (if needed).
+3. (Optional) Copy `.env.example` to `.env` and fill in values if you plan to use OneDrive.
    - `ONEDRIVE_CLIENT_ID`
    - `ONEDRIVE_CLIENT_SECRET`
-   - `SRC_FOLDER` (OneDrive folder path)
-   - `OUT_FOLDER` (local output path)
+   - `ONEDRIVE_TENANT_ID`
 
 ### OneDrive Setup
 
-- If `--src` points to a OneDrive path, the tool uses Microsoft Graph API.
-- Required environment variables:
+- OneDrive integration uses Microsoft Graph API. See `.env.example` for required variables:
   - `ONEDRIVE_CLIENT_ID`
   - `ONEDRIVE_CLIENT_SECRET`
-  - `ONEDRIVE_TENANT_ID`
-  - `SRC_FOLDER` (OneDrive folder path)
-  - `OUT_FOLDER` (local output path)
+  - `ONEDRIVE_TENANT_ID` (use `consumers` for personal accounts)
 - Register an app and configure permissions by following Microsoft's official docs: [Register an application](https://learn.microsoft.com/en-us/graph/auth-register-app-v2).
 
 ### CLI Commands
@@ -65,6 +61,8 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 | `avendehut open` | Opens generated HTML in default browser. | `--out <path>` |
 | `avendehut search` | CLI search in local index. | `--query "<text>"`, `--tags "<tag1,tag2>"` |
 | `avendehut export` | Exports catalog to CSV or JSON. | `--out <file>`, `--format csv|json` |
+
+All commands support `-h`, `-help`, and `--help` for usage and options.
 
 ### Usage
 
