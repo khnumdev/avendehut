@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Generator, Iterable, List
+from typing import Iterable
 
-from msgraph import GraphServiceClient  # type: ignore
-from azure.identity import ClientSecretCredential  # type: ignore
+try:  # Optional imports; only needed when actually listing OneDrive files
+  from msgraph import GraphServiceClient  # type: ignore
+  from azure.identity import ClientSecretCredential  # type: ignore
+except Exception:  # pragma: no cover - allow module import without heavy deps
+  GraphServiceClient = object  # type: ignore[assignment]
+  ClientSecretCredential = object  # type: ignore[assignment]
 
 
 def is_onedrive_path(path: str) -> bool:
@@ -19,7 +23,11 @@ def ensure_onedrive_env() -> None:
     raise RuntimeError(f"Missing OneDrive environment variables: {', '.join(missing)}")
 
 
-def _get_graph_client() -> GraphServiceClient:
+def _get_graph_client() -> "GraphServiceClient":  # type: ignore[name-defined]
+  # Lazy import inside function to avoid requiring these deps unless needed
+  from msgraph import GraphServiceClient  # type: ignore
+  from azure.identity import ClientSecretCredential  # type: ignore
+
   tenant_id = os.environ["ONEDRIVE_TENANT_ID"]
   client_id = os.environ["ONEDRIVE_CLIENT_ID"]
   client_secret = os.environ["ONEDRIVE_CLIENT_SECRET"]

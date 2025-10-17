@@ -38,11 +38,11 @@ def compute_file_hash(path: Path) -> str:
 
 
 @click.command(context_settings={"help_option_names": ["-h", "-help", "--help"]})
-@click.option("--src", type=click.Path(exists=True, file_okay=False, path_type=Path), required=True, help="Source folder (local path)")
+@click.option("--src", type=str, required=True, help="Source folder (local path or onedrive:/path)")
 @click.option("--out", type=click.Path(file_okay=False, path_type=Path), required=True, help="Output folder")
 @click.option("--format", "format_", type=click.Choice(["html"], case_sensitive=False), default="html", show_default=True)
 @click.option("--force", is_flag=True, help="Reprocess all files, ignoring manifest")
-def build_command(src: Path, out: Path, format_: str, force: bool) -> None:
+def build_command(src: str, out: Path, format_: str, force: bool) -> None:
   """Scan source, process new/updated books, and generate HTML site."""
   out.mkdir(parents=True, exist_ok=True)
 
@@ -50,13 +50,25 @@ def build_command(src: Path, out: Path, format_: str, force: bool) -> None:
   previous_manifest = None if force else load_manifest(manifest_path)
   previous_index = {f.path_rel: f for f in (previous_manifest.files if previous_manifest else [])}
 
-  source_files = list(iter_source_files(src))
+  # Resolve source files
+  from ..utils.onedrive import is_onedrive_path  # local import to avoid heavy deps during tests
+
+  if is_onedrive_path(src):  # pragma: no cover - network path handling not covered by tests
+    # For now, instruct users to sync/copy files locally before building
+    raise click.ClickException(
+      "OneDrive sources are not processed directly yet. Sync or copy files locally and pass a local --src path."
+    )
+  src_path = Path(src)
+  if not src_path.exists() or not src_path.is_dir():
+    raise click.ClickException(f"--src must be an existing directory: {src}")
+
+  source_files = list(iter_source_files(src_path))
   to_process: List[Path] = []
   manifest_files: List[ManifestFile] = []
 
   for file_path in source_files:
     stat = file_path.stat()
-    path_rel = str(file_path.relative_to(src))
+    path_rel = str(file_path.relative_to(src_path))
     prev = previous_index.get(path_rel)
     if prev and prev.size_bytes == stat.st_size and prev.mtime_ns == stat.st_mtime_ns:
       manifest_files.append(prev)
@@ -68,13 +80,13 @@ def build_command(src: Path, out: Path, format_: str, force: bool) -> None:
     task = progress.add_task("Processing files", total=len(to_process))
     for file_path in to_process:
       try:
-        item = extract_catalog_item(src, file_path)
+        item = extract_catalog_item(src_path, file_path)
         items.append(item)
 
         stat = file_path.stat()
         sha256 = compute_file_hash(file_path)
         manifest_files.append(
-          ManifestFile(path_rel=str(file_path.relative_to(src)), size_bytes=stat.st_size, mtime_ns=stat.st_mtime_ns, sha256=sha256)
+          ManifestFile(path_rel=str(file_path.relative_to(src_path)), size_bytes=stat.st_size, mtime_ns=stat.st_mtime_ns, sha256=sha256)
         )
       except Exception as exc:  # pragma: no cover - rare edge cases
         console.print(f"[yellow]Warning[/yellow]: Failed to process {file_path}: {exc}")
@@ -86,9 +98,9 @@ def build_command(src: Path, out: Path, format_: str, force: bool) -> None:
   # This keeps logic deterministic while still skipping heavy parsing of unchanged files.
   catalog = []
   for mf in manifest_files:
-    file_path = src / mf.path_rel
+    file_path = src_path / mf.path_rel
     try:
-      catalog.append(extract_catalog_item(src, file_path))
+      catalog.append(extract_catalog_item(src_path, file_path))
     except Exception as exc:  # pragma: no cover
       console.print(f"[yellow]Warning[/yellow]: Failed to refresh {file_path}: {exc}")
 
