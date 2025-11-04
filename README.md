@@ -29,6 +29,20 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 
 ### Installation
 
+**For users (from PyPI):**
+
+```bash
+pip install avendehut
+```
+
+Or with pipx (recommended for CLI tools):
+
+```bash
+pipx install avendehut
+```
+
+**For development:**
+
 1. Clone the repository.
    ```bash
    git clone https://github.com/khnumdev/avendehut.git
@@ -38,10 +52,11 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
    ```bash
    poetry install
    ```
-3. Set environment variables for OneDrive (if needed).
+3. Set environment variables for OneDrive (if needed) by copying `.env.example` to `.env` and filling in your values:
    - `ONEDRIVE_CLIENT_ID`
    - `ONEDRIVE_CLIENT_SECRET`
-   - `SRC_FOLDER` (OneDrive folder path)
+   - `ONEDRIVE_TENANT_ID`
+   - `SRC_FOLDER` (OneDrive folder path or local path)
    - `OUT_FOLDER` (local output path)
 
 ### OneDrive Setup
@@ -68,18 +83,45 @@ Inspired by the historical figure [Juan Hispalense (siglo XII)](https://es.wikip
 
 ### Usage
 
+**From local folder:**
+
 ```bash
 # Build a catalog from a local folder
-poetry run avendehut build --src ./books --out ./dist
+avendehut build --src ./books --out ./dist
 
 # Open the generated HTML
-poetry run avendehut open --out ./dist
+avendehut open --out ./dist
 
 # Search from the CLI
-poetry run avendehut search --out ./dist --query "Dune" --tags "sci-fi,epub"
+avendehut search --out ./dist --query "Dune" --tags "sci-fi,epub"
 
 # Export catalog
-poetry run avendehut export --src-out ./dist --format csv --out ./dist/catalog.csv
+avendehut export --src-out ./dist --format csv --out ./dist/catalog.csv
+```
+
+**From OneDrive:**
+
+First, set up your environment variables (see `.env.example`):
+```bash
+export ONEDRIVE_CLIENT_ID="your-client-id"
+export ONEDRIVE_CLIENT_SECRET="your-client-secret"
+export ONEDRIVE_TENANT_ID="consumers"  # or your tenant ID
+```
+
+Then use OneDrive paths with the `onedrive:/` scheme:
+```bash
+# Build a catalog from OneDrive folder
+avendehut build --src "onedrive:/Documents/Books" --out ./dist
+
+# Watch OneDrive folder for changes
+avendehut watch --src "onedrive:/Documents/Books" --out ./dist --interval 10
+```
+
+**Development mode (with Poetry):**
+
+When developing, prefix commands with `poetry run`:
+```bash
+poetry run avendehut build --src ./books --out ./dist
 ```
 
 ### HTML Catalog Features

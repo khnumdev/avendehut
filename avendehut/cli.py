@@ -19,10 +19,10 @@ console = Console()
 @click.group(context_settings={"help_option_names": ["-h", "-help", "--help"]})
 @click.version_option(package_name="avendehut")
 def main() -> None:
-  """avendehut - build and search a local HTML catalog of books.
+    """avendehut - build and search a local HTML catalog of books.
 
-  Inspired by Juan Hispalense (Avendehut Hispanus).
-  """
+    Inspired by Juan Hispalense (Avendehut Hispanus).
+    """
 
 
 # Register subcommands
@@ -35,9 +35,8 @@ main.add_command(export_command, name="export")
 
 
 if __name__ == "__main__":  # pragma: no cover
-  try:
-    main()
-  except click.ClickException as e:  # pragma: no cover
-    console.print(f"[red]Error:[/red] {e}")
-    sys.exit(e.exit_code if hasattr(e, "exit_code") else 1)
-
+    try:
+        main()
+    except click.ClickException as e:  # pragma: no cover
+        console.print(f"[red]Error:[/red] {e}")
+        sys.exit(e.exit_code if hasattr(e, "exit_code") else 1)
