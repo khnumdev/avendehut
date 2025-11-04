@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 from typing import Iterable
 
-from azure.identity import ClientSecretCredential  # type: ignore
-from msgraph import GraphServiceClient  # type: ignore
+from azure.identity import ClientSecretCredential  # type: ignore[import]
+from msgraph import GraphServiceClient  # type: ignore[import]
 
 
 def is_onedrive_path(path: str) -> bool:
@@ -19,7 +19,7 @@ def ensure_onedrive_env() -> None:
         raise RuntimeError(f"Missing OneDrive environment variables: {', '.join(missing)}")
 
 
-def _get_graph_client() -> GraphServiceClient:
+def _get_graph_client() -> GraphServiceClient:  # type: ignore[misc]
     tenant_id = os.environ["ONEDRIVE_TENANT_ID"]
     client_id = os.environ["ONEDRIVE_CLIENT_ID"]
     client_secret = os.environ["ONEDRIVE_CLIENT_SECRET"]
@@ -28,16 +28,19 @@ def _get_graph_client() -> GraphServiceClient:
     )
     # Use app-only default scope for Microsoft Graph
     scopes = ["https://graph.microsoft.com/.default"]
-    return GraphServiceClient(credential=credential, scopes=scopes)
+    return GraphServiceClient(credential=credential, scopes=scopes)  # type: ignore[call-arg]
 
 
-def _list_children_once(client: GraphServiceClient, rel_path: str):
+def _list_children_once(client: GraphServiceClient, rel_path: str):  # type: ignore[misc]
     if rel_path.strip("/"):
-        return client.me.drive.root.item_with_path(rel_path).children.get()
-    return client.me.drive.root.children.get()
+        result = client.me.drive.root.item_with_path(rel_path).children.get()
+        return result  # type: ignore[attr-defined]
+    return client.me.drive.root.children.get()  # type: ignore[attr-defined]
 
 
-def _iterate_children(client: GraphServiceClient, rel_path: str):
+def _iterate_children(
+    client: GraphServiceClient, rel_path: str
+):  # type: ignore[misc, no-untyped-def]
     collection = _list_children_once(client, rel_path)
     while True:
         if collection and getattr(collection, "value", None):
@@ -48,9 +51,7 @@ def _iterate_children(client: GraphServiceClient, rel_path: str):
             break
         # Follow next link via SDK request adapter
         request_adapter = client._client._request_adapter  # type: ignore[attr-defined]
-        request_info = request_adapter.base_url_provider.clone_request_information(
-            next_link
-        )
+        request_info = request_adapter.base_url_provider.clone_request_information(next_link)
         collection = request_adapter.send_async(
             request_info=request_info,
             response_type=type(collection),

@@ -33,7 +33,7 @@ def watch_command(src: str, out: Path, interval: float) -> None:
             if is_onedrive_path(src):
                 # For OneDrive, just rebuild at intervals (no file watching available)
                 console.print("Rebuilding from OneDrive...")
-                build_command.main(  # type: ignore
+                build_command.main(  # type: ignore[attr-defined]
                     args=["--src", src, "--out", str(out)],
                     prog_name="avendehut build",
                     standalone_mode=False,
@@ -46,7 +46,7 @@ def watch_command(src: str, out: Path, interval: float) -> None:
                 if snapshot != last_snapshot:
                     # Trigger a build
                     console.print("Change detected. Rebuilding...")
-                    build_command.main(  # type: ignore
+                    build_command.main(  # type: ignore[attr-defined]
                         args=["--src", src, "--out", str(out)],
                         prog_name="avendehut build",
                         standalone_mode=False,

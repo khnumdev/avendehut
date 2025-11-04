@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
-from ebooklib import epub  # type: ignore
-from pypdf import PdfReader  # type: ignore
+from ebooklib import epub  # type: ignore[import]
+from pypdf import PdfReader  # type: ignore[import]
 
 
 def _stable_id(path: Path) -> str:
@@ -22,7 +22,9 @@ def _iso(ts: float) -> str:
     return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
 
 
-def _extract_epub(path: Path) -> tuple[str, List[str], Optional[int], Optional[str], dict]:
+def _extract_epub(
+    path: Path,
+) -> tuple[str, List[str], Optional[int], Optional[str], dict[str, Optional[str]]]:
     book = epub.read_epub(str(path))
     title = (book.get_metadata("DC", "title") or [["", {}]])[0][0] or path.stem
     authors = [a[0] for a in (book.get_metadata("DC", "creator") or []) if a and a[0]] or []
@@ -47,15 +49,19 @@ def _extract_epub(path: Path) -> tuple[str, List[str], Optional[int], Optional[s
     return str(title), authors, year, (str(lang) if lang else None), extra_metadata
 
 
-def _extract_pdf(path: Path) -> tuple[str, List[str], Optional[int], Optional[str], dict]:
+def _extract_pdf(
+    path: Path,
+) -> tuple[str, List[str], Optional[int], Optional[str], dict[str, Optional[str]]]:
     """Extract PDF metadata including extended attributes.
 
     Returns: (title, authors, year, language, extra_metadata)
     where extra_metadata contains: subject, keywords, creation_date, modification_date,
     creator, producer
     """
+    from typing import Any
+
     reader = PdfReader(str(path))
-    info = reader.metadata or {}
+    info: Any = reader.metadata or {}
     title = getattr(info, "title", None) or path.stem
     author = getattr(info, "author", None)
     authors = [author] if author else []
@@ -77,7 +83,7 @@ def _extract_pdf(path: Path) -> tuple[str, List[str], Optional[int], Optional[st
     except Exception:
         modification_date = None
 
-    extra_metadata = {
+    extra_metadata: dict[str, Optional[str]] = {
         "subject": getattr(info, "subject", None),
         "keywords": getattr(info, "keywords", None),
         "creation_date": creation_date,
@@ -89,7 +95,9 @@ def _extract_pdf(path: Path) -> tuple[str, List[str], Optional[int], Optional[st
     return str(title), authors, year, None, extra_metadata
 
 
-def _extract_mobi(path: Path) -> tuple[str, List[str], Optional[int], Optional[str], dict]:
+def _extract_mobi(
+    path: Path,
+) -> tuple[str, List[str], Optional[int], Optional[str], dict[str, Optional[str]]]:
     # Best-effort: try to import mobi, else fallback to filename
     try:
         import mobi  # type: ignore
@@ -120,7 +128,7 @@ def _generate_tags(
     return sorted(tags)
 
 
-def extract_catalog_item(src_root: Path, path: Path) -> dict:
+def extract_catalog_item(src_root: Path, path: Path) -> dict[str, object]:
     """Extract metadata for a supported file and return a catalog item dict.
 
     The function is light-weight and avoids heavy NLP; it relies on embedded metadata.
@@ -128,12 +136,14 @@ def extract_catalog_item(src_root: Path, path: Path) -> dict:
     TODO: Consider grouping books by base filename to handle multiple formats (EPUB, PDF, MOBI)
     of the same book. This would require a "book" model with multiple format entries.
     """
+    from typing import Any
+
     extension = path.suffix.lower()
     title: str
     authors: List[str]
     year: Optional[int]
     language: Optional[str]
-    extra_metadata: dict
+    extra_metadata: dict[str, Optional[str]]
 
     if extension == ".epub":
         title, authors, year, language, extra_metadata = _extract_epub(path)
@@ -145,7 +155,7 @@ def extract_catalog_item(src_root: Path, path: Path) -> dict:
         raise ValueError(f"Unsupported extension: {extension}")
 
     stat = path.stat()
-    item = {
+    item: dict[str, Any] = {
         "id": _stable_id(path),
         "path_rel": str(path.relative_to(src_root)),
         "filename": path.name,

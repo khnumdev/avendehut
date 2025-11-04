@@ -26,7 +26,7 @@ def _write_json_atomic(path: Path, data: object) -> None:
     tmp.replace(path)
 
 
-def copy_template_and_write_data(out: Path, catalog: List[dict]) -> None:
+def copy_template_and_write_data(out: Path, catalog: List[dict[str, object]]) -> None:
     template_dir = Path(__file__).resolve().parents[2] / "html_template"
     _copy_template(out, template_dir)
 

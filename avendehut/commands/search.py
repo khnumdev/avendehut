@@ -12,7 +12,7 @@ from rich.table import Table
 console = Console()
 
 
-def iter_catalog(out: Path) -> Iterable[dict]:
+def iter_catalog(out: Path) -> Iterable[dict[str, object]]:
     data_json = out / "data.json"
     data_index = out / "data" / "index.json"
     if data_json.exists():
@@ -39,7 +39,7 @@ def search_command(out: Path, query: str, tags: str) -> None:
     query_lower = query.lower().strip()
     tag_filters = [t.strip().lower() for t in tags.split(",") if t.strip()]
 
-    results: List[dict] = []
+    results: List[dict[str, object]] = []
     for item in iter_catalog(out):
         haystack = " ".join(
             [

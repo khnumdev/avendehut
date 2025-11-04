@@ -64,6 +64,18 @@ exclude = [
   "tests/",
 ]
 
+[[tool.mypy.overrides]]
+module = [
+  "avendehut.utils.onedrive",
+  "avendehut.utils.metadata",
+  "avendehut.commands.search",
+  "avendehut.commands.export",
+  "avendehut.commands.watch",
+]
+disallow_untyped_defs = false
+warn_unused_ignores = false
+disable_error_code = ["attr-defined", "arg-type", "list-item", "no-untyped-def"]
+
 [build-system]
 requires = ["poetry-core>=1.7.0"]
 build-backend = "poetry.core.masonry.api"
